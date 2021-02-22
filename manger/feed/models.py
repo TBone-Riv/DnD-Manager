@@ -1,40 +1,23 @@
-from datetime import datetime
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
-from django.core.validators import \
-    RegexValidator,\
-    MinValueValidator, \
-    MaxValueValidator, \
-    URLValidator
-from django.utils.regex_helper import _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
-from extended_choices import Choices
-
-
-title_validator = RegexValidator(
-    _lazy_re_compile(r'^[-0-9a-zA-Z]*$'),
-    message=_('Enter a valid title consisting of letters, number, - and space '
-              'only.'),
-    code='invalid',
-)
+from constant import title_validator
 
 
 class Like(models.Model):
 
     user = models.ForeignKey(
-        'CustomUser',
+        'profile.CustomUser',
         unique=False,
         null=False,
         on_delete=models.CASCADE,
-        related_name='creator',
+        related_name='liked_by',
     )
     post = models.ForeignKey(
-        'PostAttachment',
+        'Post',
         unique=False,
         null=False,
         on_delete=models.CASCADE,
-        related_name='post',
+        related_name='liked_post',
     )
 
     class Meta:
@@ -43,23 +26,41 @@ class Like(models.Model):
 
 class Post(models.Model):
 
+    creation_date = models.DateField(
+        _('creation date'),
+        unique=False,
+        auto_now_add=True,
+    )
+    update_date = models.DateField(
+        _('update date'),
+        unique=False,
+        auto_now=True,
+    )
+
     parent = models.ForeignKey(
-        'PostAttachment',
+        'Post',
         unique=False,
         null=True,
         on_delete=models.CASCADE,
-        related_name='parent',
+        related_name='post_parent',
     )
     attachment = models.ForeignKey(
-        'PostAttachment',
+        'Post',
         unique=False,
         null=True,
         on_delete=models.CASCADE,
-        related_name='Attachment',
+        related_name='attached_post',
+    )
+    creator = models.ForeignKey(
+        'profile.CustomUser',
+        unique=False,
+        null=False,
+        on_delete=models.CASCADE,
+        related_name='creator',
     )
 
 
-class PostText(models.Model, Post):
+class PostText(models.Model):
 
     title = models.CharField(
         _('title'),
@@ -79,22 +80,11 @@ class PostText(models.Model, Post):
         _('content'),
         unique=False,
     )
-    creation_date = models.DateField(
-        _('creation date'),
-        unique=False,
-        auto_now_add=True,
-    )
-    update_date = models.DateField(
-        _('update date'),
-        unique=False,
-        auto_now=True,
-    )
 
-    creator = models.ForeignKey(
-        'CustomUser',
-        unique=False,
-        null=False,
+    post = models.OneToOneField(
+        'Post',
+        unique=True,
         on_delete=models.CASCADE,
-        related_name='creator',
+        related_name='text_of'
     )
 

@@ -1,67 +1,23 @@
-from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.core.validators import \
-    RegexValidator,\
     MinValueValidator, \
     MaxValueValidator, \
     URLValidator
-from django.utils.regex_helper import _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
-from extended_choices import Choices
 
-from app_feed.models import PostAttachment
-
-
-STATUS_CAMPAIGN = Choices(
-    ['OPEN', 1, _('open')],
-    ['CLOSE', 2, _('close')],
-    ['ARCHIVED', 3, _('archived')],
-)
-
-STATUS_SESSION = Choices(
-    ['WAITING', 1, _('in waiting')],
-    ['VALIDATED', 2, _('validated')],
-    ['REFUSED', 2, _('refused')],
-    ['ARCHIVED', 4, _('archived')],
-)
-
-
-name_validator = RegexValidator(
-    _lazy_re_compile(r'^[-a-zA-Z]*$'),
-    message=_('Enter a valid word consisting of letters and - only.'),
-    code='invalid',
-)
-
-discord_validator = RegexValidator(
-    _lazy_re_compile(r'.*#[0-9]{4}'),
-    message=_('Enter a valid discord username.'),
-    code='invalid',
-)
-
-title_validator = RegexValidator(
-    _lazy_re_compile(r'^[-0-9a-zA-Z]*$'),
-    message=_('Enter a valid title consisting of letters, number, - and space '
-              'only.'),
-    code='invalid',
-)
-
-
-def date_validator(value):
-    if (value.year - datetime.today().year) > 200:
-        raise ValidationError(
-            _('Enter a valid date.'),
-            code='to_old')
-    if (value.year - datetime.today().year) < 14:
-        raise ValidationError(
-            _('Enter a valid date.'),
-            code='to_young')
+from constant import \
+    STATUS_CAMPAIGN,\
+    STATUS_SESSION, \
+    name_validator,\
+    date_validator,\
+    discord_validator, \
+    extension_validator,\
+    title_validator
+from manger.feed.models import Post
 
 
 class CustomUser(AbstractUser):
-
-    REQUIRED_FIELDS = ['email', 'username']
 
     lastname = models.CharField(
         _('lastname'),
@@ -118,7 +74,7 @@ class CustomUser(AbstractUser):
     )
 
 
-class Campaign(models.Model, PostAttachment):
+class Campaign(Post):
 
     title = models.CharField(
         _('title'),
@@ -189,19 +145,7 @@ class Campaign(models.Model, PostAttachment):
         unique=False,
         help_text=_('details'),
     )
-    creation_date = models.DateField(
-        _('creation date'),
-        unique=False,
-        auto_now_add=True,
-    )
 
-    creator = models.ForeignKey(
-        'CustomUser',
-        unique=False,
-        null=False,
-        on_delete=models.CASCADE,
-        related_name='creator',
-    )
     master = models.ForeignKey(
         'CustomUser',
         unique=False,
@@ -211,7 +155,7 @@ class Campaign(models.Model, PostAttachment):
     )
 
 
-class Session(models.Model, PostAttachment):
+class Session(Post):
 
     title = models.CharField(
         _('title'),
@@ -260,22 +204,17 @@ class Session(models.Model, PostAttachment):
             'invalid': _("Invalid link."),
         }
     )
-    creation_date = models.DateField(
-        _('creation date'),
-        unique=False,
-        auto_now_add=True,
-    )
 
-    campaign = models.ForeignKey(
+    for_campaign = models.ForeignKey(
         'Campaign',
         unique=False,
         null=False,
         on_delete=models.CASCADE,
-        related_name='campaign',
+        related_name='for_campaign',
     )
 
 
-class Character(models.Model, PostAttachment):
+class Character(Post):
 
     name = models.CharField(
         _('name'),
@@ -334,7 +273,7 @@ class Character(models.Model, PostAttachment):
         unique=False,
         blank=True,
         help_text=_('pdf of your character sheet'),
-        validators=[URLValidator],
+        validators=[extension_validator],
         error_messages={
             'invalid': _("Invalid file extension."),
         }
@@ -350,25 +289,13 @@ class Character(models.Model, PostAttachment):
         unique=False,
         help_text=_('details'),
     )
-    creation_date = models.DateField(
-        _('creation date'),
-        unique=False,
-        auto_now_add=True,
-    )
 
-    creator = models.ForeignKey(
-        'CustomUser',
-        unique=False,
-        null=False,
-        on_delete=models.CASCADE,
-        related_name='creator',
-    )
-    campaign = models.ForeignKey(
+    in_campaign = models.ForeignKey(
         'Campaign',
         unique=False,
         null=True,
         on_delete=models.CASCADE,
-        related_name='campaign',
+        related_name='in_campaign',
     )
 
 
