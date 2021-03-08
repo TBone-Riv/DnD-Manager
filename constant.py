@@ -21,12 +21,6 @@ STATUS_SESSION = Choices(
 )
 
 # validator
-name_validator = RegexValidator(
-    _lazy_re_compile(r'^[-a-zA-Z]*$'),
-    message=_('Enter a valid word consisting of letters and - only.'),
-    code='invalid',
-)
-
 discord_validator = RegexValidator(
     _lazy_re_compile(r'.*#[0-9]{4}'),
     message=_('Enter a valid discord username.'),
@@ -42,11 +36,11 @@ title_validator = RegexValidator(
 
 
 def date_validator(value):
-    if (value.year - datetime.today().year) > 200:
+    if (datetime.today().year - value.year) > 200:
         raise ValidationError(
             _('Enter a valid date.'),
             code='to_old')
-    if (value.year - datetime.today().year) < 14:
+    if (datetime.today().year - value.year) < 14:
         raise ValidationError(
             _('Enter a valid date.'),
             code='to_young')

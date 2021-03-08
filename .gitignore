@@ -1,5 +1,6 @@
 # Production
-manger/staticfiles/
+manager/staticfiles/
+staticfiles/
 
 # PyCharm
 .idea
