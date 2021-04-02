@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}
+{{object.title}} by {{object.owner.username}}
+{% endblock %}
+
+{% block content %}
+<section class="page-section" id="detail">
+    <div class="h-50 container">
+        {{object.title}}
+    </div>
+</section>
+{% endblock %}
