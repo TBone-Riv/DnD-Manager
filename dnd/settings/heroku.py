@@ -1,5 +1,9 @@
 import os
 
+SECRET_KEY = os.environ['SECRET_KEY']
+
+DEBUG = False
+
 ALLOWED_HOSTS = ['https://p13-dnd-manager.herokuapp.com']
 
 DATABASES = {
