@@ -21,7 +21,10 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['https://p13-dnd-manager.herokuapp.com']
+ALLOWED_HOSTS = ['https://p13-dnd-manager.herokuapp.com',
+                 'p13-dnd-manager.herokuapp.com',
+                 'http://p13-dnd-manager.herokuapp.com',
+                 'localhost']
 
 DATABASES = {
     'default': {
