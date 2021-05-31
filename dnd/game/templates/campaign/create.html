@@ -1,19 +1,60 @@
 {% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
 {% block title %}
-New campaign
+    New campaign
 {% endblock %}
 
 {% if form.errors %}
-<p>Error in the form. Please try again.</p>
+    <p>Error in the form. Please try again.</p>
 {% endif %}
 
 {% block content %}
-<section class="page-section" id="detail">
-    <div class="h-50 container">
-    <form method="post" class="from-group mx-5 my-col">
-        {% csrf_token %}
-        {{form}}
-    </form>
+
+    {% include "border.html" with border="New Campaign" %}
+
+    <div class="container main-block">
+        <form method="post" class="from-group">
+            {% csrf_token %}
+
+            {{ form.title | add_class:"my-form-control wide-m" }}
+
+            <div class="row mt-2">
+
+                <label for="id_master" class="col-sm-1">Master :</label>
+                {{ form.master | add_class:"col-2 my-form-control" }}
+
+                <label for="id_max_player" class="col-sm-4 text-justify text-right" style="text-align: right!important;">Max player number :</label>
+                {{ form.max_player | add_class:"col-1 my-form-control" }}
+
+                <label for="id_status" class="col-sm-3 text-right" style="text-align: right!important;">Campaign status :</label>
+                {{ form.status | add_class:"col-1 my-form-control" }}
+
+            </div>
+
+            <hr>
+            <div class="row">
+
+                <div class="col-lg-6 col-md-12">
+                    <label for="id_details">Campaign description :</label>
+                    {{ form.details | add_class:"my-form-control wide-m" }}
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <label for="id_link_world">World anvil link :</label>
+                    {{ form.link_world | add_class:"my-form-control wide-m" }}
+                    <label for="id_default_link_vtable" class="mt-3">VT link :</label>
+                    {{ form.default_link_vtable | add_class:"my-form-control wide-m" }}
+                    <label for="id_default_link_vocal" class="mt-3">Discord channel link :</label>
+                    {{ form.default_link_vocal | add_class:"my-form-control wide-m" }}
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn m-3">Create New</button>
+        </form>
+
     </div>
-</section>
+
 {% endblock %}

@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import View
@@ -9,11 +10,24 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+from dnd.base.constant import (
+    STATUS_CAMPAIGN,
+    STATUS_SESSION,
+)
 
-from .models import Campaign, Character, Session
+from .models import Campaign, Character, Session, SessionsCharacterStatus
 from .form import CampaignForm, CharacterForm, SessionForm
 
 
+# CAMPAIGN VIEW ================================================================
+# Campaign detail. "campaign"
+class CampaignDetailView(LoginRequiredMixin, DetailView):
+    model = Campaign
+    login_url = reverse_lazy("profile:login")
+    template_name = "campaign/view.html"
+
+
+# List of campaign for a user name. "list-campaign"
 class CampaignListView(LoginRequiredMixin, ListView):
 
     model = Campaign
@@ -21,57 +35,67 @@ class CampaignListView(LoginRequiredMixin, ListView):
     template_name = "campaign/list.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(creator=self.request.user)
+        return super().get_queryset().filter(
+            creator=get_object_or_404(
+                get_user_model(),
+                username=self.kwargs.get("user_name")
+            )
+        )
 
 
-class CampaignDetailView(LoginRequiredMixin, DetailView):
-
-    model = Campaign
-    login_url = reverse_lazy("profile:login")
-    template_name = "campaign/view.html"
-
-
+# Campaign creation. "new-campaign"
 class CampaignCreateView(LoginRequiredMixin, CreateView):
 
-    form_class = CampaignForm
     model = Campaign
+    fields = [
+        "title",
+        "details",
+        "link_world",
+        "default_link_vtable",
+        "default_link_vocal",
+        "master", "max_player", "status",
+    ]
     login_url = reverse_lazy("profile:login")
     template_name = "campaign/create.html"
 
+    def get_form(self, form_class=None):
+        """Return an instance of the form to be used in this view."""
+        form = super().get_form(form_class=form_class)
+        form.initial['master'] = self.request.user
+        form.initial['status'] = STATUS_CAMPAIGN.OPEN
+        return form
+
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
-        form.creator = self.request.user
-        self.object = form.save()
+        form.instance.creator = self.request.user
         return super().form_valid(form)
 
 
+# Campaign Update. Access only if user = creator else redirect to detail.
+# "my-campaign"
 class CampaignUpdateView(LoginRequiredMixin, UpdateView):
 
-    form_class = CampaignForm
     model = Campaign
+    fields = [
+        "title",
+        "details",
+        "link_world",
+        "default_link_vtable",
+        "default_link_vocal",
+        "master", "max_player", "status",
+    ]
     login_url = reverse_lazy("profile:login")
     template_name = "campaign/update.html"
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if self.request.user != self.object.creator:
-            return redirect("profile:campaign", pk=self.kwargs.get("pk"))
+        if self.request.user != self.get_object().creator:
+            return redirect("game:campaign", pk=self.kwargs.get("pk"))
         return super().get(request, *args, **kwargs)
-
-    # def get_queryset(self):
-    #     return  super().get_queryset().get_object_or_404(creator=self.request.user)
+# END CAMPAIGN VIEW ============================================================
 
 
-class CharacterListView(LoginRequiredMixin, ListView):
-
-    model = Character
-    login_url = reverse_lazy("profile:login")
-    template_name = "character/list.html"
-
-    def get_queryset(self):
-        return super().get_queryset().filter(creator=self.request.user)
-
-
+# CHARACTER VIEW ===============================================================
+# Character detail. "character"
 class CharacterDetailView(LoginRequiredMixin, DetailView):
 
     model = Character
@@ -79,34 +103,108 @@ class CharacterDetailView(LoginRequiredMixin, DetailView):
     template_name = "character/view.html"
 
 
+# List of character for a user name. "list-character"
+class CharacterListView(LoginRequiredMixin, ListView):
+
+    model = Character
+    login_url = reverse_lazy("profile:login")
+    template_name = "character/list.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            creator=get_object_or_404(
+                get_user_model(),
+                username=self.kwargs.get("user_name")
+            )
+        )
+
+
+# List of character for a campaign. "list-campaign-character"
+class CharacterCampaignListView(LoginRequiredMixin, ListView):
+
+    model = Character
+    login_url = reverse_lazy("profile:login")
+    template_name = "campaign/add_player.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            in_campaign=get_object_or_404(
+                Campaign,
+                id=self.kwargs.get("pk")
+            )
+        )
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            characters=Character.objects.filter(
+                in_campaign=None,  # Not already in a campaign
+            ).exclude(  # Not already in this campaign
+                creator__in=[
+                    character.creator for character in self.get_queryset()
+                ]
+            )
+        )
+
+    def post(self, request, *args, **kwargs):
+        character = Character.objects.get(id=self.request.POST.get('new_character'))
+        character.in_campaign = Campaign.objects.get(id=self.kwargs.get("pk"))
+        character.save()
+        return super().get(request, *args, **kwargs)
+
+
+# Character creation. "new-character"
 class CharacterCreateView(LoginRequiredMixin, CreateView):
 
-    form_class = CharacterForm
     model = Character
+    fields = [
+        "name",
+        "character_class",
+        "character_race",
+        "character_level",
+        "details"
+    ]
     login_url = reverse_lazy("profile:login")
     template_name = "character/create.html"
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
-        form.instence.creator = self.request.user
-        self.object = form.save()
+        form.instance.creator = self.request.user
         return super().form_valid(form)
 
 
+# Character Update. Access only if user = creator else redirect to detail.
+# "my-character"
 class CharacterUpdateView(LoginRequiredMixin, UpdateView):
 
-    form_class = CharacterForm
     model = Character
+    fields = [
+        "name",
+        "character_class",
+        "character_race",
+        "character_level",
+        "details"
+    ]
     login_url = reverse_lazy("profile:login")
     template_name = "character/update.html"
 
     def get(self, request, *args, **kwargs):
         view = super().get(request, *args, **kwargs)
         if self.request.user != self.object.creator:
-            return redirect(CharacterDetailView, pk=self.request.POST.get("pk"))
+            return redirect("game:character", pk=self.kwargs.get("pk"))
         return view
+# END CHARACTER VIEW ===========================================================
 
 
+# SESSION VIEW =================================================================
+# Session detail. "session"
+class SessionDetailView(LoginRequiredMixin, DetailView):
+
+    model = Session
+    login_url = reverse_lazy("profile:login")
+    template_name = "session/view.html"
+
+
+# List of session for a user name. "list-session"
 class SessionListView(LoginRequiredMixin, ListView):
 
     model = Session
@@ -114,49 +212,120 @@ class SessionListView(LoginRequiredMixin, ListView):
     template_name = "session/list.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(creator=self.request.user)
+        user = get_object_or_404(
+            get_user_model(),
+            username=self.kwargs.get("user_name")
+        )
+        return super().get_queryset().filter(
+            for_campaign__in=[
+                campaign for campaign in
+                Campaign.objects.filter(master=user)
+                             ] + [
+                character.in_campaign for character in
+                Character.objects.filter(creator=user)
+            ]
+        )
 
 
-class SessionDetailView(LoginRequiredMixin, DetailView):
+# List of session for a campaign. "list-campaign-session"
+class SessionCampaignListView(LoginRequiredMixin, ListView):
 
     model = Session
     login_url = reverse_lazy("profile:login")
-    template_name = "Session/view.html"
+    template_name = "campaign/add_session.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            for_campaign=Campaign.objects.get(id=self.kwargs.get("pk"))
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["creator"] = Campaign.objects.get(
+            id=self.kwargs.get("pk")
+        ).creator
+
+        return context
 
 
+# List of session for a character. "list-character-session"
+class SessionCharacterListView(LoginRequiredMixin, ListView):
+
+    model = Session
+    login_url = reverse_lazy("profile:login")
+    template_name = "session/list.html"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            for_campaign=Character.objects.get(
+                id=self.kwargs.get("pk")
+            ).in_campaign
+        )
+
+
+# Session creation. "new-session"
 class SessionCreateView(LoginRequiredMixin, CreateView):
 
-    form_class = SessionForm
     model = Session
+    fields = [
+        "title",
+        "date",
+        "link_vtable",
+        "link_vocal"
+    ]
     login_url = reverse_lazy("profile:login")
     template_name = "Session/create.html"
-
-    def post(self, request, *args, **kwargs):
-        self.campaign = Campaign.objects.get_object_or_404(
-            id=self.kwargs.get("pk"),
-            creator=self.request.user
-        )
-        return super().post(request, *args, **kwargs)
-
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         form.instance.creator = self.request.user
-        form.instance.for_campaign = self.campaign
-        self.object = form.save()
-        # SessionsPlayerStatus ?? dans save
+
+        form.instance.for_campaign = Campaign.objects.get(
+            id=self.kwargs.get("pk"),
+            creator=self.request.user
+        )
+
         return super().form_valid(form)
 
 
+# Session Update. Access only if user = creator else redirect to detail.
+# "my-session"
 class SessionUpdateView(LoginRequiredMixin, UpdateView):
 
-    form_class = SessionForm
     model = Session
+    fields = [
+        "title",
+        "date",
+        "link_vtable",
+        "link_vocal"
+    ]
     login_url = reverse_lazy("profile:login")
     template_name = "Session/update.html"
 
     def get(self, request, *args, **kwargs):
         view = super().get(request, *args, **kwargs)
         if self.request.user != self.object.creator:
-            return redirect(CharacterDetailView, pk=self.request.POST.get("pk"))
+            return redirect("game:session", pk=self.kwargs.get("pk"))
         return view
+
+
+class SessionStatusUpdateView(LoginRequiredMixin, UpdateView):
+
+    model = SessionsCharacterStatus
+    fields = ["status"]
+    login_url = reverse_lazy("profile:login")
+    template_name = "Session/vote.html"
+    success_url = "/"
+
+    def get_object(self, queryset=None):
+
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        queryset = queryset.filter(
+            session=self.kwargs.get("pk"),
+            character__in=Character.objects.filter(creator=self.request.user)
+        )
+
+        return queryset.get()

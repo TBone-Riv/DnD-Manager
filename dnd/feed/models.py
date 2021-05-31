@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from dnd.base.constant import title_validator
+from dnd.base.validator import title_validator
 
 
 class Like(models.Model):

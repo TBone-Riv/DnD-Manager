@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
+{% block title %}
+    All campaign by {{object.owner.username}}
+{% endblock %}
+
+
+{% block content %}
+
+    {% include "border.html" with border="Campaign" %}
+
+    <div class="main-block">
+        <div class="row">
+            {% for campaign in object_list %}
+                <a href="{% url 'game:my-campaign' pk=campaign.id %}" class="col-md-3 col-sm-12 my-form-control m-4">
+                    <h2>{{ campaign.title }}</h2>
+                    <p class="my-text-muted text-right"> by {{campaign.creator.username}} </p>
+                </a>
+            {% endfor %}
+            {% if user.get_username == view.kwargs.user_name %}
+                <a href="{% url 'game:new-campaign' %}" class="col-md-3 col-sm-12 my-form-control m-4 align-content-center">
+                    <p class="">New Campaign</p>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

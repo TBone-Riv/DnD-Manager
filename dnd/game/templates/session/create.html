@@ -1,19 +1,32 @@
 {% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
 {% block title %}
-New session of {{ object.campaing }}
+    New session for {{ object.campaign }}
 {% endblock %}
 
 {% if form.errors %}
-<p>Error in the form. Please try again.</p>
+    <p>Error in the form. Please try again.</p>
 {% endif %}
 
 {% block content %}
-<section class="page-section" id="detail">
-    <div class="h-50 container">
-    <form method="post" class="from-group mx-5 my-col">
-        {% csrf_token %}
-        {{form}}
-    </form>
+
+    {% include "border.html" with border="New session" %}
+
+    <div class="container main-block">
+        <form method="post" class="from-group">
+            {% csrf_token %}
+
+            {{ form.title | add_class:"my-form-control wide-m" }}
+
+            <label for="id_character_class" class="wide-m mt-2">date :</label>
+            {{ form.date | add_class:"my-form-control wide-m" }}
+
+            <button type="submit" class="btn m-3">Create New</button>
+        </form>
+
     </div>
-</section>
+
 {% endblock %}

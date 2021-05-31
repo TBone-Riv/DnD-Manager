@@ -1,0 +1,19 @@
+{% load static %}
+{% load addclass %}
+
+<div id="navigation" class="navbar bg-light rounded navbar-expand-md fixed-top p-2">
+    <div class="container">
+        <h1 class="navbar-brand">DnD Manager</h1>
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto row justify-content-end">
+                <li class="nav-item col-lg-1 col-md-1"><a style="color: white;" href="{% url 'profile:account' %}"><i class="fas fa-user-circle"></i></a></li>
+{#                <!–– {{ user.get_username } -->#}
+                <li class="nav-item col-lg-1 col-md-1"><a style="color: white;" href="{% url 'game:list-campaign' user_name=user.get_username %}"><i class="fas fa-atlas"></i></a></li>
+                <li class="nav-item col-lg-1 col-md-1"><a style="color: white;" href="{% url 'game:list-character' user_name=user.get_username %}"><i class="fas fa-user"></i></a></li>
+                <li class="nav-item col-lg-1 col-md-1"><a style="color: white;" href="{% url 'game:list-session' user_name=user.get_username %}"><i class="fas fa-calendar-check"></i></a></li>
+                <li class="nav-item col-lg-1 col-md-1"><a style="color: white;" href="{% url 'profile:logout' %}"><i class="fas fa-sign-out-alt"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
+{% block title %}
+    Character for campaign
+{% endblock %}
+
+
+{% block content %}
+
+    {% include "border.html" with border="Character" %}
+
+    <div class="main-block">
+        <div class="row">
+            {% for character in object_list %}
+                <a href="{% url 'game:my-character' pk=character.id %}" class="col-md-3 col-sm-12 my-form-control m-4">
+                    <h2>{{ character.name }}</h2>
+                    <p class="my-text-muted text-right"> by {{character.creator.username}} </p>
+                </a>
+            {% endfor %}
+            <form method="post" class="col-md-3 col-sm-12 m-4">
+                {% csrf_token %}
+                <select name="new_character" required="" id="id_new_character" class="my-form-control wide-m">
+                    {% for character in characters %}
+                        <option value="{{character.id}}" selected="">{{character.name}}</option>
+                    {% endfor %}
+
+                </select>
+                <button type="submit" class="btn wide-m">Add this Character</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

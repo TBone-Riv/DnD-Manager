@@ -1,12 +1,27 @@
 {% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
 {% block title %}
-{{object.title}} by {{object.owner.username}}
+    Session
 {% endblock %}
 
+{% if form.errors %}
+    <p>Error in the form. Please try again.</p>
+{% endif %}
+
 {% block content %}
-<section class="page-section" id="detail">
-    <div class="h-50 container">
-        {{object.title}}
+
+    {% include "border.html" with border=object.title %}
+
+    <div class="container main-block">
+        <div class="">
+
+            <h2>{{ object.name }}</h2>
+
+            <p class="wide-m mt-2">{{ form.title }} on {{ form.date }}</p>
+
+        </div>
     </div>
-</section>
 {% endblock %}

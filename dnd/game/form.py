@@ -6,19 +6,19 @@ from .models import (
 )
 
 
-class CampaignForm(forms):
+class CampaignForm(forms.ModelForm):
     class Meta:
         model = Campaign
-        fields = []
+        exclude = ["parent", "attachment", "creator", "status"]
 
 
-class SessionForm(forms):
+class SessionForm(forms.ModelForm):
     class Meta:
         model = Session
-        fields = []
+        exclude = ["parent", "attachment", "creator", "status", "in_campaign"]
 
 
-class CharacterForm(forms):
+class CharacterForm(forms.ModelForm):
     class Meta:
         model = Character
-        fields = []
+        exclude = ["parent", "attachment", "creator", ]

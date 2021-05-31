@@ -1,28 +1,61 @@
 {% extends 'base.html' %}
 
-{% block title %}register{% endblock %}
+{% load static %}
+{% load addclass %}
+
+{% block title %}
+    My account
+{% endblock %}
+
 
 {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
+    <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 
 {% if next %}
     {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
+        <p>Your account doesn't have access to this page. To proceed,
+            please login with an account that has access.</p>
     {% else %}
-    <p>Please login to see this page.</p>
+        <p>Please login to see this page.</p>
     {% endif %}
 {% endif %}
 
 {% block content %}
-<section class="page-section" id="detail">
-    <div class="h-50 container">
-    <form method="post" class="from-group mx-5 my-col">
-        {% csrf_token %}
-        {{form.as_p}}
-        <button type="submit" class="btn btn-success">Register</button>
-    </form>
+
+    {% include "border.html" with border=user.get_username %}
+
+    <div class="container main-block">
+        <form method="post" class="from-group">
+            {% csrf_token %}
+
+            <div class="mt-2 row">
+
+                <p class="col-sm-3">Username : {{ object.username }}</p>
+
+                <p class="col-sm-3 text-justify text-right" style="text-align: right!important;">Name : {{ object.first_name  }} {{ object.last_name  }}</p>
+
+                <p class="col text-right" style="text-align: right!important;">Email : {{ object.email }}</p>
+
+            </div>
+
+            <div class="row mt-2">
+
+                <label for="id_discord" class="col-sm-1">Discord :</label>
+                {{ form.discord | add_class:"col-2 my-form-control" }}
+
+                <label for="id_status_open_master" class="col-sm-4 text-justify text-right" style="text-align: right!important;">Open to master :</label>
+                {{ form.status_open_master | add_class:"col-1" }}
+
+                <label for="id_status_open_player" class="col-sm-3 text-right" style="text-align: right!important;">Open to play :</label>
+                {{ form.status_open_player | add_class:"col-1" }}
+
+            </div>
+
+            <button type="submit" class="btn btn-success">Save modification</button>
+
+        </form>
+
     </div>
-</section>
+
 {% endblock %}

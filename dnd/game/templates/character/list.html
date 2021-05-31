@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
+{% block title %}
+    All character by {{user}}
+{% endblock %}
+
+
+{% block content %}
+
+    {% include "border.html" with border="Character" %}
+
+    <div class="main-block">
+        <div class="row">
+            {% for character in object_list %}
+                <a href="{% url 'game:my-character' pk=character.id %}" class="col-md-3 col-sm-12 my-form-control m-4">
+                    <h2>{{ character.name }}</h2>
+                    <p class="my-text-muted text-right"> by {{character.creator.username}} </p>
+                </a>
+            {% endfor %}
+            {% if user.get_username == view.kwargs.user_name %}
+                <a href="{% url 'game:new-character' %}" class="col-md-3 col-sm-12 my-form-control m-4 align-content-center">
+                    <p class="">New Character</p>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

@@ -31,25 +31,21 @@ class TestUrls(TestCase):
         self.client.login(username='username', password='password')
 
         response = self.client.get(reverse("profile:home"))
-        print(response.status_code)
         self.assertEqual(response.status_code, 200)
 
     def test_login(self):
 
         response = self.client.get(reverse("profile:login"))
-        print(response.status_code)
         self.assertEqual(response.status_code, 200)
 
     def test_logout(self):
 
         response = self.client.get(reverse("profile:logout"))
-        print(response.status_code)
         self.assertEqual(response.status_code, 200)
 
     def test_register(self):
 
         response = self.client.get(reverse("profile:register"))
-        print(response.status_code)
         self.assertEqual(response.status_code, 200)
 
     def test_account(self):
@@ -61,5 +57,4 @@ class TestUrls(TestCase):
         self.client.login(username='username', password='password')
 
         response = self.client.get(reverse("profile:account"))
-        print(response.status_code)
         self.assertEqual(response.status_code, 200)

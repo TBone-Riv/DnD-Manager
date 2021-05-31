@@ -1,12 +1,62 @@
 {% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
 {% block title %}
-{{object.title}} by {{object.owner.username}}
+    {{object.title}} by {{object.owner.username}}
 {% endblock %}
 
+
 {% block content %}
-<section class="page-section" id="detail">
-    <div class="h-50 container">
-        {{object.title}}
+
+    {% include "border.html" with border=object.title %}
+
+    <div class="container main-block">
+        <div class="">
+
+            <h2>{{ object.title }}</h2>
+
+            <div class="row mt-2">
+
+                <p class="col-sm-4">Master : {{ object.master }}</p>
+
+                <p class="col-sm-4 text-justify text-right" style="text-align: right!important;">Max player number : {{ object.max_player  }}</p>
+
+                <p class="col-sm-4 text-right" style="text-align: right!important;">{{ object.status }}</p>
+
+            </div>
+
+            <hr>
+            <div class="row">
+
+                <div class="col-lg-6 col-md-12">
+                    <p class="col-sm-1">{{ object.details }}</p>
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <p class="col-sm-1">World anvil : {{ object.link_world }}</p>
+                    <p class="col-sm-1">VT link : {{ object.default_link_vtable }}</p>
+                    <p class="col-sm-1">Discord : {{ object.default_link_vocal }}</p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <hr>
+        <div class="row">
+
+            <a href="{% url 'game:list-character-session' pk=object.id %}" class="col-sm-6">
+                <button class="btn">List Character</button>
+            </a>
+
+            <a href="{% url 'game:list-session' user_name=user.get_username %}" class="col-sm-6">
+                <button class="btn">List Session</button>
+            </a>
+
+        </div>
+
     </div>
-</section>
+
 {% endblock %}

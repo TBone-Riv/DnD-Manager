@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
+{% block title %}
+    Vote
+{% endblock %}
+
+{% if form.errors %}
+    <p>Error in the form. Please try again.</p>
+{% endif %}
+
+{% block content %}
+
+    {% include "border.html" with border="Vote" %}
+
+    <div class="container main-block">
+    <form method="post" class="from-group">
+        {% csrf_token %}
+        {{ form.status | add_class:"my-form-control wide-m" }}
+
+        <button type="submit" class="btn wide-m">Update {{ object.title }}</button>
+    </form>
+{% endblock %}
+

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 from django.core.validators import (
     MinValueValidator,
     MaxValueValidator,
@@ -49,7 +50,7 @@ class Campaign(Post):
         _('status'),
         unique=False,
         choices=STATUS_CAMPAIGN,
-        default=STATUS_CAMPAIGN.CLOSE
+        default=STATUS_CAMPAIGN.OPEN
     )
     link_world = models.CharField(
         'world anvil',
@@ -98,6 +99,9 @@ class Campaign(Post):
         related_name='master',
     )
 
+    def get_absolute_url(self):
+        return reverse("game:my-campaign", kwargs={'pk': self.id})
+
 
 class Session(Post):
 
@@ -137,6 +141,7 @@ class Session(Post):
             'invalid': _("Invalid link."),
         }
     )
+
     link_vocal = models.CharField(
         _('discord voice channel'),
         max_length=250,
@@ -156,6 +161,21 @@ class Session(Post):
         on_delete=models.CASCADE,
         related_name='for_campaign',
     )
+
+    def get_absolute_url(self):
+        return reverse("game:my-session", kwargs={'pk': self.id})
+
+    def save(self, *args, **kwargs):
+
+        saved = super().save(*args, **kwargs)
+
+        for character in Character.objects.filter(in_campaign=self.for_campaign):
+            SessionsCharacterStatus.objects.create(
+                session=self,
+                character=character
+            )
+
+        return saved
 
 
 class Character(Post):
@@ -242,8 +262,11 @@ class Character(Post):
         related_name='in_campaign',
     )
 
+    def get_absolute_url(self):
+        return reverse("game:my-character", kwargs={'pk': self.id})
 
-class SessionsPlayerStatus(models.Model):
+
+class SessionsCharacterStatus(models.Model):
 
     status = models.PositiveSmallIntegerField(
         _('status'),
@@ -268,10 +291,10 @@ class SessionsPlayerStatus(models.Model):
         on_delete=models.CASCADE,
         related_name='session',
     )
-    player = models.ForeignKey(
+    character = models.ForeignKey(
         'Character',
         unique=False,
         null=False,
         on_delete=models.CASCADE,
-        related_name='player',
+        related_name='character',
     )

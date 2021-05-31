@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load addclass %}
+
+{% block title %}
+    All session
+{% endblock %}
+
+
+{% block content %}
+
+    {% include "border.html" with border="Session" %}
+
+    <div class="main-block">
+        <div class="row">
+            {% for session in object_list %}
+                <a href="{% url 'game:my-session' pk=session.id %}" class="col-md-3 col-sm-12 my-form-control m-4">
+                    <h2>{{ session.title }}</h2>
+                    <p class="my-text-muted text-right"> by {{session.creator.username}} </p>
+                </a>
+            {% endfor %}
+            <a href="{% url 'game:new-session' pk=view.kwargs.pk %}" class="col-md-3 col-sm-12 my-form-control m-4" >New Session</a>
+        </div>
+    </div>
+
+{% endblock %}
