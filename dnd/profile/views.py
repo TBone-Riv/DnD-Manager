@@ -1,13 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.sites.shortcuts import get_current_site
-from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import (
     CreateView,
-    DetailView,
-    ListView,
     TemplateView,
     UpdateView,
 )

@@ -169,7 +169,9 @@ class Session(Post):
 
         saved = super().save(*args, **kwargs)
 
-        for character in Character.objects.filter(in_campaign=self.for_campaign):
+        for character in Character.objects.filter(
+                in_campaign=self.for_campaign):
+
             SessionsCharacterStatus.objects.create(
                 session=self,
                 character=character
@@ -190,7 +192,7 @@ class Character(Post):
                     'only.'),
         validators=[title_validator],
         error_messages={
-            'invalid': _("Invalid name. letters, numbers, dash and space only"),
+            'invalid': _("Invalid name. letters, numbers, dash and space only")
         }
     )
     character_class = models.CharField(

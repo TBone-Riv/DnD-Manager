@@ -208,5 +208,3 @@ class TestSession(TestCase):
         url = reverse("game:vote-session", kwargs={'pk': self.session.id})
         self.assertEqual(resolve(url).func.__name__,
                          SessionStatusUpdateView.as_view().__name__)
-
-

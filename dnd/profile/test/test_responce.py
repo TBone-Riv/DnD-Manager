@@ -26,7 +26,7 @@ class TestUrls(TestCase):
 
         response = self.client.get(reverse("profile:home"))
 
-        self.assertEqual(response.status_code, 302) # falow true + asser ulr de redirection
+        self.assertEqual(response.status_code, 302)
 
         self.client.login(username='username', password='password')
 

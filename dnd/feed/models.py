@@ -87,4 +87,3 @@ class PostText(models.Model):
         on_delete=models.CASCADE,
         related_name='text_of'
     )
-

@@ -32,7 +32,6 @@ def date_validator(value):
 
 
 def extension_validator(value):
-    ext = splitext(value.name)[1]
     if splitext(value.name)[1] != '.pdf':
         raise ValidationError(
             _('Wrong file extension'),

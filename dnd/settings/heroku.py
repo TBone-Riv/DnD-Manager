@@ -45,7 +45,6 @@ DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -139,4 +138,3 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 AUTH_USER_MODEL = 'profile.CustomUser'
-

@@ -153,7 +153,8 @@ class TestCharacter(TestCase):
         self.client.login(username='username2', password='password')
 
         url = reverse("game:my-character", kwargs={'pk': self.character.id})
-        url_detail = reverse("game:character", kwargs={'pk': self.character.id})
+        url_detail = reverse("game:character",
+                             kwargs={'pk': self.character.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 

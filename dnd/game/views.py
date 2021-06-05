@@ -1,25 +1,21 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import (
     CreateView,
     DetailView,
     ListView,
-    TemplateView,
     UpdateView,
 )
 from dnd.base.constant import (
     STATUS_CAMPAIGN,
-    STATUS_SESSION,
 )
 
 from .models import Campaign, Character, Session, SessionsCharacterStatus
-from .form import CampaignForm, CharacterForm, SessionForm
 
 
-# CAMPAIGN VIEW ================================================================
+# CAMPAIGN VIEW ===============================================================
 # Campaign detail. "campaign"
 class CampaignDetailView(LoginRequiredMixin, DetailView):
     model = Campaign
@@ -91,10 +87,10 @@ class CampaignUpdateView(LoginRequiredMixin, UpdateView):
         if self.request.user != self.get_object().creator:
             return redirect("game:campaign", pk=self.kwargs.get("pk"))
         return super().get(request, *args, **kwargs)
-# END CAMPAIGN VIEW ============================================================
+# END CAMPAIGN VIEW ===========================================================
 
 
-# CHARACTER VIEW ===============================================================
+# CHARACTER VIEW ==============================================================
 # Character detail. "character"
 class CharacterDetailView(LoginRequiredMixin, DetailView):
 
@@ -146,7 +142,8 @@ class CharacterCampaignListView(LoginRequiredMixin, ListView):
         )
 
     def post(self, request, *args, **kwargs):
-        character = Character.objects.get(id=self.request.POST.get('new_character'))
+        character = Character.objects.get(
+            id=self.request.POST.get('new_character'))
         character.in_campaign = Campaign.objects.get(id=self.kwargs.get("pk"))
         character.save()
         return super().get(request, *args, **kwargs)
@@ -192,10 +189,10 @@ class CharacterUpdateView(LoginRequiredMixin, UpdateView):
         if self.request.user != self.object.creator:
             return redirect("game:character", pk=self.kwargs.get("pk"))
         return view
-# END CHARACTER VIEW ===========================================================
+# END CHARACTER VIEW ==========================================================
 
 
-# SESSION VIEW =================================================================
+# SESSION VIEW ================================================================
 # Session detail. "session"
 class SessionDetailView(LoginRequiredMixin, DetailView):
 
